@@ -9,6 +9,7 @@ import project.landmark.service.LandmarkService;
 
 import java.util.List;
 
+//잔디가 왜 안깔리지 ㅠㅠ
 @RestController
 @RequestMapping("/landmarks")
 @RequiredArgsConstructor
