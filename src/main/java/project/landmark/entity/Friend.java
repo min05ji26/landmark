@@ -1,7 +1,8 @@
-package com.walkapp.entity;
+package project.landmark.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import project.landmark.entity.FriendStatus;
 import project.landmark.entity.User;
 
 @Entity
