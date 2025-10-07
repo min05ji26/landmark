@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
   servlet:
     encoding:
       charset: UTF-8
@@ -19,7 +19,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/landmark?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: "!jjrudwns1"
+    password: "121212"
 
 
   ####################################
@@ -28,7 +28,7 @@ spring:
   jpa:
     open-in-view: true      #
     hibernate:
-      ddl-auto: create      # create, update, ...
+      ddl-auto: update      # create, update, ...
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy # ?????? ?????? ??
     show-sql: true          # SQL ?? ??  myName <--> my_name(?????? ??????)

@@ -33,6 +33,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	// ✅ JWT 토큰 발급용도
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+
 	// ✅ 추가: MySQL JDBC 드라이버 (런타임에만 필요)
 	runtimeOnly 'com.mysql:mysql-connector-j:8.4.0'
 	// ✅ 추가: 개발 편의(자동 재시작/라이브리로드 등)
