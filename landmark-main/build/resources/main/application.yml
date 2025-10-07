@@ -1,0 +1,37 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  aplication:
+    name: landmark
+
+  devtools:
+    livereload:
+      endabled: true
+    restart:
+      endabled: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/landmark?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: "!jjrudwns1"
+
+
+  ####################################
+  # JPA ??
+  ####################################
+  jpa:
+    open-in-view: true      #
+    hibernate:
+      ddl-auto: create      # create, update, ...
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy # ?????? ?????? ??
+    show-sql: true          # SQL ?? ??  myName <--> my_name(?????? ??????)
+    properties:
+      hibernate:
+        format_sql: true    # SQL ??? ??
