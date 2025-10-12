@@ -22,19 +22,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // ✅ CSRF 비활성화
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ✅ 세션 사용 X
+
+                // ✅ 세션 사용 안 함 (JWT 기반)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // ✅ 요청별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/test.html").permitAll() // 로그인, 회원가입, html 허용
-                        .anyRequest().authenticated() // 나머지는 인증 필요
+                        // 🔓 인증 없이 접근 가능한 경로들
+                        .requestMatchers(
+                                "/",
+                                "/favicon.ico",
+                                "/rankingtest.html",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/api/auth/**",
+                                "/api/ranking/**"  // ✅ 랭킹 API 허용
+                        ).permitAll()
+
+                        // 🔒 나머지는 인증 필요
+                        .anyRequest().authenticated()
                 )
+
+                // ✅ JWT 인증 필터 등록 (UsernamePasswordAuthenticationFilter 앞에 실행)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    // ✅ 비밀번호 암호화기 (BCrypt)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

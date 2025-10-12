@@ -28,7 +28,12 @@ public class User {
     private String nickname;
 
     private Long totalSteps = 0L;
+
     private String representativeTitle;
+
+    // ✅ 추가: 유저가 속한 구 정보 (예: 강남구, 송파구 등)
+    @Column(length = 30)
+    private String district;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
