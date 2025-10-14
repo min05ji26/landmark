@@ -22,27 +22,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // ✅ CSRF 비활성화
+                // ✅ CSRF 비활성화 (REST API 사용 시 필수)
                 .csrf(csrf -> csrf.disable())
 
-                // ✅ 세션 사용 안 함 (JWT 기반)
+                // ✅ 세션 사용 안 함 (JWT 기반 인증 구조)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // ✅ 요청별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 🔓 인증 없이 접근 가능한 경로들
+                        // 🔓 인증 없이 접근 가능한 경로들 (테스트/정적 리소스)
                         .requestMatchers(
                                 "/",
                                 "/favicon.ico",
-                                "/rankingtest.html",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/api/auth/**",
-                                "/api/ranking/**"  // ✅ 랭킹 API 허용
+                                "/achievement_test.html",  // ✅ 업적 테스트 페이지 허용
+                                "/rankingtest.html",       // ✅ 랭킹 테스트 페이지 허용
+                                "/api/auth/**",            // 로그인/회원가입 관련 API
+                                "/api/ranking/**",         // 랭킹 관련 API
+
+                                // ✅ 업적 관련 API 전체 허용 (CRUD + unlock + user조회)
+                                "/api/achievements/**"
                         ).permitAll()
 
-                        // 🔒 나머지는 인증 필요
+                        // 🔒 그 외 경로는 인증 필요
                         .anyRequest().authenticated()
                 )
 
@@ -57,5 +61,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

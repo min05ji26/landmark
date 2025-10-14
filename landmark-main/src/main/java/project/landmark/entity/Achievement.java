@@ -4,15 +4,28 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Achievement {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;            // 예: 럭키세븐
-    private String conditionType;   // 총 걸음 수, 특정 패턴 등
-    private Long conditionValue;    // 예: 7777
-    private String rewardTitle;     // 달성 시 칭호
+    @Column(nullable = false, unique = true, length = 50)
+    private String name; // 업적명 (예: '10000보 달성')
+
+    @Column(nullable = false, length = 200)
+    private String description; // 업적 설명
+
+    @Column(nullable = false)
+    private int conditionValue; // 조건 값 (예: 10000보)
+
+    @Column(nullable = false)
+    private String conditionType; // 조건 타입 (예: "step", "landmark")
+
+    private String iconUrl; // 업적 아이콘 이미지 경로
 }

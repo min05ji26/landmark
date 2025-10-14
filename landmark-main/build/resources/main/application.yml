@@ -20,6 +20,7 @@ spring:
     url: jdbc:mysql://localhost:3306/landmark?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: "121212"
+    #노트북은 비번 다름
 
 
   ####################################
