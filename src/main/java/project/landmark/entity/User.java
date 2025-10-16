@@ -15,7 +15,7 @@ public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키 자동 생성
-    private Long id;
+    private Long userId;
 
     @Column(nullable = false, unique = true, length = 50) // 로그인용 ID
     private String username;
