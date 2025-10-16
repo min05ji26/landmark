@@ -17,12 +17,11 @@ public class ProfileService {
     private final FriendRepository friendRepository;
     private final TitleRepository titleRepository;
 
-    // ✅ 1. 프로필 조회
-    public ProfileResponseDto getProfile(String username) {
-        User user = userRepository.findByUsername(username)
+    //프로필 조회
+    public ProfileResponseDto getProfile(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
-        // 친구 목록 변환
         List<FriendDto> friends = friendRepository.findByUser(user).stream()
                 .map(f -> FriendDto.builder()
                         .id(f.getId())
@@ -31,7 +30,6 @@ public class ProfileService {
                         .build())
                 .collect(Collectors.toList());
 
-        // 획득한 칭호 목록 (예: Title 엔티티와 연결되어 있다면)
         List<String> titles = titleRepository.findAll().stream()
                 .map(Title::getName)
                 .collect(Collectors.toList());
@@ -45,7 +43,7 @@ public class ProfileService {
                 .build();
     }
 
-    // ✅ 2. 프로필 수정 (닉네임 / 대표칭호)
+    //프로필 수정 (닉네임, 대표 칭호)
     public ProfileResponseDto updateProfile(Long userId, String newNickname, String newTitle) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
@@ -55,6 +53,7 @@ public class ProfileService {
 
         userRepository.save(user);
 
-        return getProfile(user.getUsername()); // 수정 후 최신 정보 반환
+        return getProfile(user.getId());
     }
+
 }
