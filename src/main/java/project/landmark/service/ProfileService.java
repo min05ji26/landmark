@@ -66,6 +66,7 @@ public class ProfileService {
     }
 
     /* ✅ [4] 대표 칭호 변경 */
+    // 대표 칭호 변경 할 때에 엔티티 UserTitle 안 쓰는데 이후에 확인 한번 더
     @Transactional
     public void updateTitle(Long userId, String newTitle) {
         User user = userRepository.findById(userId)

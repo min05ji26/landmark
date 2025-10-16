@@ -36,4 +36,7 @@ public class User{
     private LocalDateTime createdAt;  // 가입일
     private LocalDateTime updatedAt;  // 마지막 수정일
 
+    public Long getSteps() {
+        return totalSteps != null ? totalSteps : 0L;
+    }
 }

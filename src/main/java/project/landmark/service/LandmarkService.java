@@ -3,17 +3,14 @@ package project.landmark.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import project.landmark.entity.Landmark;
-import project.landmark.repository.LandmarkRepository;
-
+import project.landmark.entity.User;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class LandmarkService {
 
-    //private final LandmarkRepository landmarkRepository;
-
-    //Landmark 객체 만들면서 랜드마크 데이터 넣기
+    // 임시 데이터 (DB 미사용)
     private final List<Landmark> landmarks = List.of(
             new Landmark(1L, "해운대", 20000L, "부산 해운대 해변", "해운대 빠돌이"),
             new Landmark(2L, "오사카성", 50000L, "일본 오사카성", "오사카 정복자"),
@@ -25,22 +22,33 @@ public class LandmarkService {
             new Landmark(8L, "오페라하우스", 350000L, "호주 시드니 오페라하우스", "남반구의 예술가")
     );
 
-
-    //생성
-    //public Landmark save(Landmark landmark){
-    //    return landmarkRepository.save(landmark);
-    //}
-
-    public List<Landmark> findAll(){
+    // 호전체 랜드마크 목록 (페이지 진입 시)
+    public List<Landmark> findAll() {
         return landmarks;
     }
 
-    //랜드마크 단건 조회
+    // 단건 조회
     public Landmark findById(Long id) {
         return landmarks.stream()
                 .filter(l -> l.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 랜드마크 없음: " + id));
     }
+
+    public String unlockLandmark(User user, Long id) {
+        Landmark landmark = findById(id);
+
+        // User에 steps 필드 존재해야 함
+        Long userSteps = user.getSteps();
+        Long requiredSteps = landmark.getRequiredSteps(); // 3번째 인자 (ex: 20000L)
+
+        if (userSteps >= requiredSteps) {
+            return landmark.getName() + " 해금 완료! 칭호: " + landmark.getRewardTitle();
+        } else {
+            long lack = requiredSteps - userSteps;
+            return "아직 " + lack + "보 부족합니다. (" + userSteps + "/" + requiredSteps + ")";
+        }
+    }
+
 
 }
