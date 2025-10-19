@@ -1,42 +1,30 @@
-package project.landmark.entity;
+@Entity
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
+public class User {
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@Entity // JPA 엔티티임을 표시
-@Table(name = "users")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class User{
+    private String username;   // 유저명
+    private Long steps;        // 누적 걸음 수
+    private int level;         // 레벨
+    private String title;      // 대표 칭호 (ex. "해운대 빠돌이")
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키 자동 생성
-    private Long userId;
+    // 걸음 수 추가 시 자동 레벨업
+    public void addSteps(Long newSteps) {
+        this.steps += newSteps;
+        checkLevelUp();
+    }
 
-    @Column(nullable = false, unique = true, length = 50) // 로그인용 ID
-    private String username;
+    private void checkLevelUp() {
+        int newLevel = (int)(steps / 10000) + 1; // 예시: 1만보마다 레벨 1씩 상승
+        if (newLevel > this.level) {
+            this.level = newLevel;
+        }
+    }
 
-    @Column(nullable = false) // 암호화된 비밀번호
-    private String password;
-
-    @Column(nullable = false, unique = true, length = 100) // 이메일
-    private String email;
-
-    @Column(nullable = false, length = 30) // 닉네임
-    private String nickname;
-
-    private Long totalSteps = 0L; // 총 걸음 수 (default 0)
-
-    private String representativeTitle; // 대표 칭호
-
-    private LocalDateTime createdAt;  // 가입일
-    private LocalDateTime updatedAt;  // 마지막 수정일
-
-    public Long getSteps() {
-        return totalSteps != null ? totalSteps : 0L;
+    public void changeTitle(String newTitle) {
+        this.title = newTitle;
     }
 }

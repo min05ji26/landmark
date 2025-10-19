@@ -10,42 +10,44 @@ import project.landmark.service.ProfileService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/profile")
 @RequiredArgsConstructor
+@RequestMapping("/api/profile")
 public class ProfileController {
 
     private final ProfileService profileService;
 
-    // 프로필 기본 정보 조회
-    // 페이지 진입 시 기본 정보 (닉네임, 총 걸음 수, 대표 칭호)
-    @GetMapping("/{id}")
-    public ResponseEntity<ProfileResponseDto> getProfileBasic(@PathVariable Long id) {
-        ProfileResponseDto profile = profileService.getProfileBasic(id);
-        return ResponseEntity.ok(profile);
+    /* ✅ [1] 프로필 기본 정보 조회 */
+    @GetMapping("/{userId}")
+    public ResponseEntity<ProfileResponseDto> getProfile(@PathVariable Long userId) {
+        ProfileResponseDto response = profileService.getProfileBasic(userId);
+        return ResponseEntity.ok(response);
     }
 
-    // 친구 목록 조회
-    // 프로필에서 친구 목록 버튼 클릭 시 호출
-    @GetMapping("/{id}/friends")
-    public ResponseEntity<List<FriendDto>> getMyFriends(@PathVariable Long id) {
-        List<FriendDto> friends = profileService.getMyFriends(id);
+    /* ✅ [2] 친구 목록 조회 */
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<List<FriendDto>> getFriends(@PathVariable Long userId) {
+        List<FriendDto> friends = profileService.getMyFriends(userId);
         return ResponseEntity.ok(friends);
     }
 
-    //보유 칭호 목록 조회
-    //칭호 설정 페이지에서 호출
-    @GetMapping("/{id}/titles")
-    public ResponseEntity<List<String>> getMyTitles(@PathVariable Long id) {
-        List<String> titles = profileService.getMyTitles(id);
+    /* ✅ [3] 보유 칭호 목록 조회 */
+    @GetMapping("/{userId}/titles")
+    public ResponseEntity<List<String>> getMyTitles(@PathVariable Long userId) {
+        List<String> titles = profileService.getMyTitles(userId);
         return ResponseEntity.ok(titles);
     }
 
-    // [4] 대표 칭호 변경
-    // ex) PUT /api/profile/1/title?newTitle=오사카 탐험가
-    @PutMapping("/{id}/title")
-    public ResponseEntity<String> updateTitle(@PathVariable Long id,
-                                              @RequestParam String newTitle) {
-        profileService.updateTitle(id, newTitle);
-        return ResponseEntity.ok("대표 칭호가 변경되었습니다: " + newTitle);
+    /* ✅ [4] 대표 칭호 변경 (PUT /api/profile/title?userId=1&newTitle=오사카 정복자) */
+    @PutMapping("/title")
+    public ResponseEntity<String> updateTitle(@RequestParam Long userId, @RequestParam String newTitle) {
+        profileService.updateTitle(userId, newTitle);
+        return ResponseEntity.ok("대표 칭호가 '" + newTitle + "'로 변경되었습니다.");
+    }
+
+    /* ✅ [5] 걸음 수 추가 및 자동 레벨업 (PUT /api/profile/steps?userId=1&steps=3000) */
+    @PutMapping("/steps")
+    public ResponseEntity<String> addSteps(@RequestParam Long userId, @RequestParam Long steps) {
+        String result = profileService.addSteps(userId, steps);
+        return ResponseEntity.ok(result);
     }
 }

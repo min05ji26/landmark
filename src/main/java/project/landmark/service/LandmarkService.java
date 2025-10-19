@@ -10,6 +10,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LandmarkService {
 
+    private final LandmarkRepository landmarkRepository;
+    private final UserLandmarkRepository userLandmarkRepository;
+
     // 임시 데이터 (DB 미사용)
     private final List<Landmark> landmarks = List.of(
             new Landmark(1L, "해운대", 20000L, "부산 해운대 해변", "해운대 빠돌이"),
@@ -22,33 +25,42 @@ public class LandmarkService {
             new Landmark(8L, "오페라하우스", 350000L, "호주 시드니 오페라하우스", "남반구의 예술가")
     );
 
-    // 호전체 랜드마크 목록 (페이지 진입 시)
+    // 전체 랜드마크 목록 (페이지 진입 시)
     public List<Landmark> findAll() {
         return landmarks;
     }
 
-    // 단건 조회
+    // 랜드마크 ID로 찾기
     public Landmark findById(Long id) {
-        return landmarks.stream()
-                .filter(l -> l.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 랜드마크 없음: " + id));
+        return landmarkRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 랜드마크 ID입니다: " + id));
     }
 
+    //랜드마크 해금
     public String unlockLandmark(User user, Long id) {
         Landmark landmark = findById(id);
-
-        // User에 steps 필드 존재해야 함
         Long userSteps = user.getSteps();
-        Long requiredSteps = landmark.getRequiredSteps(); // 3번째 인자 (ex: 20000L)
+        Long requiredSteps = landmark.getRequiredSteps();
+
+        // 이미 해금했는지 확인
+        if (userLandmarkRepository.existsByUserAndLandmark(user, landmark)) {
+            return "이미 해금한 랜드마크입니다.";
+        }
 
         if (userSteps >= requiredSteps) {
+            // 해금 내역 저장
+            UserLandmark record = UserLandmark.builder()
+                    .user(user)
+                    .landmark(landmark)
+                    .build(); // unlockedAt은 @PrePersist로 자동 저장
+            userLandmarkRepository.save(record);
+
             return landmark.getName() + " 해금 완료! 칭호: " + landmark.getRewardTitle();
         } else {
             long lack = requiredSteps - userSteps;
             return "아직 " + lack + "보 부족합니다. (" + userSteps + "/" + requiredSteps + ")";
         }
     }
-
-
 }
+
+

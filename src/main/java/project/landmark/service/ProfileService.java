@@ -30,10 +30,10 @@ public class ProfileService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         return ProfileResponseDto.builder()
-
                 .nickname(user.getNickname())
                 .totalSteps(user.getTotalSteps())
                 .representativeTitle(user.getRepresentativeTitle())
+                .level(user.getLevel()) // 레벨도 함께 전달
                 .build();
     }
 
@@ -59,14 +59,12 @@ public class ProfileService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // (아직 보유 칭호 구조가 없으면 임시로 전체 목록 반환)
-        // 나중에 UserTitle 테이블 연결 시 여기 수정
         return titleRepository.findAll().stream()
                 .map(Title::getName)
                 .collect(Collectors.toList());
     }
 
     /* ✅ [4] 대표 칭호 변경 */
-    // 대표 칭호 변경 할 때에 엔티티 UserTitle 안 쓰는데 이후에 확인 한번 더
     @Transactional
     public void updateTitle(Long userId, String newTitle) {
         User user = userRepository.findById(userId)
@@ -77,6 +75,28 @@ public class ProfileService {
 
         user.setRepresentativeTitle(title.getName());
     }
-    
 
+    /* ✅ [5] 걸음 수 추가 + 레벨업 로직 */
+    @Transactional
+    public String addSteps(Long userId, Long addedSteps) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        long beforeSteps = user.getTotalSteps();
+        int beforeLevel = user.getLevel();
+
+        long newTotal = beforeSteps + addedSteps;
+        user.setTotalSteps(newTotal);
+
+        // 간단한 레벨업 규칙 예시: 1만보마다 1레벨 상승
+        int newLevel = (int)(newTotal / 10000) + 1;
+        user.setLevel(newLevel);
+
+        String result = "걸음 수가 " + addedSteps + "보 추가되었습니다. (총 " + newTotal + "보)";
+        if (newLevel > beforeLevel) {
+            result += " 🎉 레벨 업! (" + beforeLevel + " → " + newLevel + ")";
+        }
+
+        return result;
+    }
 }
