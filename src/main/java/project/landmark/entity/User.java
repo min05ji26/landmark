@@ -1,15 +1,32 @@
+package project.landmark.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+
 @Entity
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username;   // 유저명
     private Long steps;        // 누적 걸음 수
     private int level;         // 레벨
     private String title;      // 대표 칭호 (ex. "해운대 빠돌이")
+    private String password;
+    private String nickname;
+    private Long totalSteps;
+    private String representativeTitle;
+
 
     // 걸음 수 추가 시 자동 레벨업
     public void addSteps(Long newSteps) {

@@ -13,4 +13,5 @@ public class ProfileResponseDto {
     private String representativeTitle; // 대표 칭호
     private List<FriendDto> friends;   // 친구 목록
     private List<String> titles;       // 획득한 칭호 이름 리스트
+    private int level;
 }

@@ -1,19 +1,19 @@
 server:
-  port: 8081
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
       force: true
 
 spring:
-  aplication:
+  application:
     name: landmark
 
   devtools:
     livereload:
-      endabled: true
+      enabled: true
     restart:
-      endabled: true
+      enabled: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,18 +21,18 @@ spring:
     username: root
     password: "1234"
 
-
-
-  ####################################
-  # JPA ??
-  ####################################
   jpa:
-    open-in-view: true      #
+    open-in-view: true
     hibernate:
-      ddl-auto: create      # create, update, ...
+      ddl-auto: create
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy # ?????? ?????? ??
-    show-sql: true          # SQL ?? ??  myName <--> my_name(?????? ??????)
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true
+    defer-datasource-initialization: true
     properties:
       hibernate:
-        format_sql: true    # SQL ??? ??
+        format_sql: true
+
+  sql:
+    init:
+      mode: always

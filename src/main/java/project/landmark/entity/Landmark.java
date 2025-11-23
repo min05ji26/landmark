@@ -15,4 +15,5 @@ public class Landmark {
     private Long requiredSteps;     // 필요 걸음 수
     private String description;
     private String rewardTitle;     // 해금 시 얻는 칭호
+    private String imageUrl;
 }

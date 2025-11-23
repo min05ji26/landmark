@@ -2,65 +2,82 @@ package project.landmark.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import project.landmark.dto.LandmarkProgressDto;
 import project.landmark.entity.Landmark;
 import project.landmark.entity.User;
+import project.landmark.entity.UserLandmark;
+import project.landmark.repository.LandmarkRepository;
+import project.landmark.repository.UserLandmarkRepository;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LandmarkService {
 
     private final LandmarkRepository landmarkRepository;
     private final UserLandmarkRepository userLandmarkRepository;
 
-    // 임시 데이터 (DB 미사용)
-    private final List<Landmark> landmarks = List.of(
-            new Landmark(1L, "해운대", 20000L, "부산 해운대 해변", "해운대 빠돌이"),
-            new Landmark(2L, "오사카성", 50000L, "일본 오사카성", "오사카 정복자"),
-            new Landmark(3L, "에펠탑", 100000L, "프랑스 파리 에펠탑", "파리 정복자"),
-            new Landmark(4L, "자유의 여신상", 150000L, "미국 뉴욕 자유의 여신상", "자유의 수호자"),
-            new Landmark(5L, "만리장성", 200000L, "중국 만리장성", "장성 정복자"),
-            new Landmark(6L, "타지마할", 250000L, "인도 아그라 타지마할", "인도의 보석"),
-            new Landmark(7L, "피라미드", 300000L, "이집트 기자 피라미드", "파라오의 후예"),
-            new Landmark(8L, "오페라하우스", 350000L, "호주 시드니 오페라하우스", "남반구의 예술가")
-    );
-
-    // 전체 랜드마크 목록 (페이지 진입 시)
+    // 전체 랜드마크 목록 조회 > 디비에서 가져옴
+    @Transactional(readOnly = true)
     public List<Landmark> findAll() {
-        return landmarks;
+        return landmarkRepository.findAll();
     }
 
-    // 랜드마크 ID로 찾기
+    // 아이디로 랜드마크 찾기 (랜드마크 단건조회)
+    @Transactional(readOnly = true)
     public Landmark findById(Long id) {
         return landmarkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 랜드마크 ID입니다: " + id));
     }
 
-    //랜드마크 해금
-    public String unlockLandmark(User user, Long id) {
-        Landmark landmark = findById(id);
-        Long userSteps = user.getSteps();
-        Long requiredSteps = landmark.getRequiredSteps();
+    // [핵심 메서드] 유저 기준 랜드마크 리스트 + 진행률/해금 여부 조회
+    /**
+     *      1) 이미 해금됐는지(UserLandmark 존재 여부) 확인
+     *      2) 유저 걸음 수와 requiredSteps로 진행률(%) 계산 (최대 100%)
+     *      3) 위 정보를 LandmarkProgressDto로 변환해서 리스트로 반환
+     */
+    public List<LandmarkProgressDto> getLandmarksForUser(User user) {
 
-        // 이미 해금했는지 확인
-        if (userLandmarkRepository.existsByUserAndLandmark(user, landmark)) {
-            return "이미 해금한 랜드마크입니다.";
-        }
+        // 1) 유저의 현재 걸음 수 (로그인에서 이미 유저는 보장된 상태라고 가정)
+        long userSteps = user.getSteps() != null ? user.getSteps() : 0L;
 
-        if (userSteps >= requiredSteps) {
-            // 해금 내역 저장
-            UserLandmark record = UserLandmark.builder()
-                    .user(user)
-                    .landmark(landmark)
-                    .build(); // unlockedAt은 @PrePersist로 자동 저장
-            userLandmarkRepository.save(record);
+        // 2) DB에서 모든 랜드마크 조회 (정렬 필요하면 여기서 추가)
+        List<Landmark> landmarks = landmarkRepository.findAll();
 
-            return landmark.getName() + " 해금 완료! 칭호: " + landmark.getRewardTitle();
-        } else {
-            long lack = requiredSteps - userSteps;
-            return "아직 " + lack + "보 부족합니다. (" + userSteps + "/" + requiredSteps + ")";
-        }
+        // 3) 각 랜드마크 → DTO로 변환
+        return landmarks.stream()
+                .map(landmark -> {
+
+                    // 3-1) 이 유저가 이 랜드마크를 해금했는지 여부
+                    boolean unlocked = userLandmarkRepository.existsByUserAndLandmark(user, landmark);
+
+                    Long requiredSteps = landmark.getRequiredSteps();
+                    if (requiredSteps == null || requiredSteps <= 0) {
+                        requiredSteps = 1L; // 0 나누기 방지용 안전 처리
+                    }
+
+                    // 3-2) 진행률 계산 (예: 12000 / 5000 * 100 = 240% → 100으로 고정)
+                    int progressPercent = (int) Math.round((double) userSteps * 100 / requiredSteps);
+                    if (progressPercent > 100) {
+                        progressPercent = 100;
+                    }
+
+                    // 3-3) DTO로 묶어서 반환
+                    return LandmarkProgressDto.builder()
+                            .id(landmark.getId())
+                            .name(landmark.getName())
+                            .imageUrl(landmark.getImageUrl())   // 엔티티에 imageUrl 필드 있다고 가정
+                            .requiredSteps(landmark.getRequiredSteps())
+                            .currentSteps(userSteps)            // 🔹 실제 유저 걸음 수 그대로 (12000 등)
+                            .progressPercent(progressPercent)   // 🔹 바에는 이 값 사용 (최대 100)
+                            .unlocked(unlocked)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
+
 }
-
-
