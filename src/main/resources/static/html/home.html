@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>홈</title>
+  <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ⏰ 상단 시간 -->
+  <div class="time">10:00 AM</div>
+  <div class="divider"></div>
+
+  <!-- 🗓 날짜 / 걸음 정보 -->
+  <section class="walk-info">
+    <div class="date">11월 24일</div>
+    <div class="desc">오늘 깅깡님의 걸음 수예요</div>
+    <div class="steps">
+      <span class="number">총 2300 걸음</span>
+    </div>
+    <div class="remain">에펠탑 달성까지는 1500보 남았어요</div>
+
+    <!-- 오른쪽 원형 프로필 이미지 -->
+    <div class="profile-circle">
+      <img src="/img/penguin.png" alt="">
+    </div>
+  </section>
+
+  <!-- 🧭 첫 번째 카드 -->
+  <div class="card">
+    <div class="row">
+      <img class="icon" src="/img/landmark.png" alt="">
+      <div class="text">
+        <div class="title">랜드마크</div>
+        <div class="sub">현재 내 위치 → 오사카성</div>
+      </div>
+    </div>
+    <div class="line"></div>
+
+    <div class="row">
+      <img class="icon" src="/img/rank.png" alt="">
+      <div class="text">
+        <div class="title">랭킹</div>
+        <div class="sub">2위</div>
+      </div>
+    </div>
+    <div class="line"></div>
+
+    <div class="row">
+      <img class="icon" src="/img/achievement.png" alt="">
+      <div class="text">
+        <div class="title">업적</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👤 내 프로필 카드 -->
+  <div class="card small">
+    <div class="row">
+      <img class="icon" src="/img/profile.png" alt="">
+      <div class="text">
+        <div class="title">내 프로필</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👥 친구 카드 -->
+  <div class="card small">
+    <div class="row">
+      <img class="icon" src="/img/friend.png" alt="">
+      <div class="text">
+        <div class="title">친구</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
