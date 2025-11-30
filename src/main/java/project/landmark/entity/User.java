@@ -17,7 +17,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ----- kj 기능 (인증/회원가입) -----
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
@@ -36,10 +35,25 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Builder.Default
+    private Long totalSteps = 0L;
+
+    private String representativeTitle;
+
+    @Builder.Default
+    private int level = 1;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String profileImageUrl;
+
+    // 🚨 [추가] 상태 메시지 컬럼
+    private String statusMessage;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+        if (this.totalSteps == null) this.totalSteps = 0L;
     }
 
     @PreUpdate
@@ -47,29 +61,16 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // ----- 공통 필드 -----
-    private Long totalSteps = 0L;
-    private String representativeTitle;
-
-    // ----- mj 기능 (레벨링 시스템) -----
-    private Long steps = 0L;
-    private int level = 1;
-    private String title; // mj title
-
     public void addSteps(Long newSteps) {
-        if (this.steps == null) this.steps = 0L;
-        this.steps += newSteps;
+        if (this.totalSteps == null) this.totalSteps = 0L;
+        this.totalSteps += newSteps;
         checkLevelUp();
     }
 
     private void checkLevelUp() {
-        int newLevel = (int)(steps / 10000) + 1;
+        int newLevel = (int)(this.totalSteps / 10000) + 1;
         if (newLevel > this.level) {
             this.level = newLevel;
         }
-    }
-
-    public void changeTitle(String newTitle) {
-        this.title = newTitle;
     }
 }

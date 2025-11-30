@@ -19,7 +19,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/landmark?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: "1234"
+    password: "121212"
+    #컴퓨터 121212 노트북 1234
 
   sql:
     init:

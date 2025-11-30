@@ -1,6 +1,7 @@
 package project.landmark.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.landmark.dto.UserRankingDto;
@@ -30,24 +31,38 @@ public class RankingService {
     public List<UserRankingDto> calculateWeeklyRanking() {
         LocalDate end = LocalDate.now();
         LocalDate start = end.minusDays(7);
-        var result = stepRecordRepository.sumStepsByUserBetweenDates(start, end);
-        return mapToRankingDto(result);
+        try {
+            // DB 에러가 나도 빈 리스트 반환 (409 에러 방지)
+            var result = stepRecordRepository.sumStepsByUserBetweenDates(start, end);
+            return mapToRankingDto(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // ✅ 월간 랭킹
     public List<UserRankingDto> calculateMonthlyRanking() {
         LocalDate end = LocalDate.now();
         LocalDate start = end.withDayOfMonth(1);
-        var result = stepRecordRepository.sumStepsByUserBetweenDates(start, end);
-        return mapToRankingDto(result);
+        try {
+            var result = stepRecordRepository.sumStepsByUserBetweenDates(start, end);
+            return mapToRankingDto(result);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     // ✅ 구별 랭킹
     public List<UserRankingDto> calculateDistrictRanking(String district) {
         LocalDate end = LocalDate.now();
         LocalDate start = end.minusDays(7);
-        var result = stepRecordRepository.sumStepsByDistrictBetweenDates(start, end, district);
-        return mapToRankingDto(result);
+        try {
+            var result = stepRecordRepository.sumStepsByDistrictBetweenDates(start, end, district);
+            return mapToRankingDto(result);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     // ✅ 친구 랭킹
@@ -61,12 +76,18 @@ public class RankingService {
         LocalDate end = LocalDate.now();
         LocalDate start = end.minusDays(7);
 
-        var all = stepRecordRepository.sumStepsByUserBetweenDates(start, end);
-        var filtered = all.stream()
-                .filter(obj -> obj != null && obj.length >= 1 && friends.contains((User) obj[0]))
-                .collect(Collectors.toList());
+        try {
+            var all = stepRecordRepository.sumStepsByUserBetweenDates(start, end);
+            if (all == null) return new ArrayList<>();
 
-        return mapToRankingDto(filtered);
+            var filtered = all.stream()
+                    .filter(obj -> obj != null && obj.length >= 1 && friends.contains((User) obj[0]))
+                    .collect(Collectors.toList());
+
+            return mapToRankingDto(filtered);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     // ============================================================
@@ -76,36 +97,33 @@ public class RankingService {
         List<UserRankingDto> list = new ArrayList<>();
         int rank = 1;
 
-        // 랜드마크 목록 null 안정화
-        List<Landmark> landmarks = landmarkRepository.findAllByOrderByRequiredStepsAsc();
+        // 🚨 안전하게 정렬 객체(Sort) 사용
+        List<Landmark> landmarks = landmarkRepository.findAll(Sort.by(Sort.Direction.ASC, "requiredSteps"));
         if (landmarks == null) landmarks = new ArrayList<>();
 
-        if (result == null) result = new ArrayList<>();
+        if (result == null) return list;
 
         for (Object[] row : result) {
-
-            // 🔒 row null 방어
+            // 🔒 row 데이터 검증
             if (row == null || row.length < 2) continue;
 
             User user = (User) row[0];
             Long totalSteps = (Long) row[1];
 
-            // 🔒 user null 방어 → 유저가 없으면 스킵
             if (user == null) continue;
-
-            // 🔒 totalSteps null 방어
             if (totalSteps == null) totalSteps = 0L;
 
-            // 🔒 닉네임 null 방어
             String nickname = user.getNickname() != null ? user.getNickname() : "알 수 없음";
-
-            // 🔒 대표칭호 null 허용
             String title = user.getRepresentativeTitle();
 
             // =======================
             //   현재 랜드마크 계산
             // =======================
-            String currentLandmarkName = "집";
+            String currentLandmarkName = "시작점";
+            if (!landmarks.isEmpty()) {
+                currentLandmarkName = landmarks.get(0).getName() + " 입구";
+            }
+
             long currentTotal = user.getTotalSteps() != null ? user.getTotalSteps() : 0L;
 
             for (Landmark lm : landmarks) {
@@ -114,14 +132,13 @@ public class RankingService {
                 } else break;
             }
 
-            // DTO 생성
             list.add(new UserRankingDto(
                     user.getId(),
                     nickname,
                     totalSteps,
                     rank++,
                     title,
-                    currentLandmarkName + " 여행 중..."
+                    currentLandmarkName
             ));
         }
 

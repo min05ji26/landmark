@@ -11,7 +11,7 @@ description = 'Demo project for Spring Boot'
 java {
 	toolchain {
 		// ✅ 네 JDK가 22라면 22로 맞추자
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(22)
 	}
 }
 

@@ -35,16 +35,16 @@ public class LandmarkService {
 
     // [핵심 메서드] 유저 기준 랜드마크 리스트 + 진행률/해금 여부 조회
     /**
-     *      1) 이미 해금됐는지(UserLandmark 존재 여부) 확인
-     *      2) 유저 걸음 수와 requiredSteps로 진행률(%) 계산 (최대 100%)
-     *      3) 위 정보를 LandmarkProgressDto로 변환해서 리스트로 반환
+     * 1) 이미 해금됐는지(UserLandmark 존재 여부) 확인
+     * 2) 유저 걸음 수와 requiredSteps로 진행률(%) 계산 (최대 100%)
+     * 3) 위 정보를 LandmarkProgressDto로 변환해서 리스트로 반환
      */
     public List<LandmarkProgressDto> getLandmarksForUser(User user) {
 
-        // 1) 유저의 현재 걸음 수 (로그인에서 이미 유저는 보장된 상태라고 가정)
-        long userSteps = user.getSteps() != null ? user.getSteps() : 0L;
+        // 🚨 [수정] getSteps() -> getTotalSteps()로 변경되었습니다.
+        long userSteps = user.getTotalSteps() != null ? user.getTotalSteps() : 0L;
 
-        // 2) DB에서 모든 랜드마크 조회 (정렬 필요하면 여기서 추가)
+        // 2) DB에서 모든 랜드마크 조회
         List<Landmark> landmarks = landmarkRepository.findAll();
 
         // 3) 각 랜드마크 → DTO로 변환
@@ -71,12 +71,11 @@ public class LandmarkService {
                             .name(landmark.getName())
                             .imageUrl(landmark.getImageUrl())   // 엔티티에 imageUrl 필드 있다고 가정
                             .requiredSteps(landmark.getRequiredSteps())
-                            .currentSteps(userSteps)            // 🔹 실제 유저 걸음 수 그대로 (12000 등)
+                            .currentSteps(userSteps)            // 🔹 실제 유저 걸음 수 그대로
                             .progressPercent(progressPercent)   // 🔹 바에는 이 값 사용 (최대 100)
                             .unlocked(unlocked)
                             .build();
                 })
                 .collect(Collectors.toList());
     }
-
 }

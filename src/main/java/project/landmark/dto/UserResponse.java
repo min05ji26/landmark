@@ -16,10 +16,11 @@ public class UserResponse {
     private String nickname;
     private Long totalSteps;
     private String representativeTitle;
-    private int level; // 👈 추가된 부분 (홈 화면 프로그레스바 계산용)
+    private int level;
+    private String profileImageUrl;
+    private String statusMessage; // 🚨 [추가]
     private LocalDateTime createdAt;
 
-    // User 엔티티를 UserResponse로 변환하는 메서드 (편의용)
     public static UserResponse from(User user) {
         return UserResponse.builder()
                 .id(user.getId())
@@ -28,7 +29,9 @@ public class UserResponse {
                 .nickname(user.getNickname())
                 .totalSteps(user.getTotalSteps())
                 .representativeTitle(user.getRepresentativeTitle())
-                .level(user.getLevel()) // 레벨 데이터 포함
+                .level(user.getLevel())
+                .profileImageUrl(user.getProfileImageUrl())
+                .statusMessage(user.getStatusMessage()) // 🚨 [추가]
                 .createdAt(user.getCreatedAt())
                 .build();
     }

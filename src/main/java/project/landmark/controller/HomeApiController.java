@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import project.landmark.dto.ApiResponse;
-import project.landmark.dto.UserRankingDto; // 👈 추가됨
+import project.landmark.dto.UserRankingDto;
 import project.landmark.entity.Landmark;
 import project.landmark.entity.User;
 import project.landmark.service.LandmarkService;
@@ -33,8 +33,8 @@ public class HomeApiController {
             return ResponseEntity.status(401).body(ApiResponse.fail("로그인이 필요합니다."));
         }
 
-        // 1. 내 랭킹 계산하기 (실제 로직 적용)
-        int myRank = 0; // 순위권 밖일 경우 0 또는 적절한 값
+        // 1. 내 랭킹 계산하기
+        int myRank = 0; // 기본값 0 (순위권 밖)
         List<UserRankingDto> weeklyRanking = rankingService.calculateWeeklyRanking();
 
         for (UserRankingDto dto : weeklyRanking) {
@@ -44,43 +44,49 @@ public class HomeApiController {
                 break;
             }
         }
-
-        // 랭킹에 데이터가 없거나 순위권 밖이면 표시할 기본값 (예: 999위)
-        if (myRank == 0) {
-            myRank = weeklyRanking.size() + 1;
-        }
+        // 🚨 수정: 랭킹에 없으면 억지로 전체인원+1 하지 않고 0으로 둠 (프론트에서 '-' 처리)
 
         // 2. 현재 랜드마크 & 목표 랜드마크 계산하기
         List<Landmark> allLandmarks = landmarkService.findAll();
         Landmark currentLandmark = null;
         Landmark nextLandmark = null;
 
-        // 걸음 수에 따라 내가 어디 있는지 찾기
-        for (Landmark lm : allLandmarks) {
-            if (user.getTotalSteps() >= lm.getRequiredSteps()) {
-                currentLandmark = lm; // 통과한 곳 중 가장 높은 곳
-            } else {
-                nextLandmark = lm; // 아직 못 간 곳 중 가장 낮은 곳 (목표)
-                break;
+        Long currentSteps = user.getTotalSteps() != null ? user.getTotalSteps() : 0L;
+
+        // DB에 랜드마크가 없을 경우 대비
+        if (allLandmarks.isEmpty()) {
+            nextLandmark = Landmark.builder().name("데이터 없음").requiredSteps(100000L).build();
+        } else {
+            for (Landmark lm : allLandmarks) {
+                if (currentSteps >= lm.getRequiredSteps()) {
+                    currentLandmark = lm; // 통과한 곳 중 가장 높은 곳
+                } else {
+                    nextLandmark = lm; // 아직 못 간 곳 중 가장 낮은 곳 (목표)
+                    break;
+                }
+            }
+            // 모든 랜드마크를 깼다면 마지막 랜드마크를 목표로 유지
+            if (nextLandmark == null) {
+                nextLandmark = allLandmarks.get(allLandmarks.size() - 1);
             }
         }
 
-        // 만약 모든 랜드마크를 다 깼다면?
-        if (nextLandmark == null && !allLandmarks.isEmpty()) {
-            nextLandmark = allLandmarks.get(allLandmarks.size() - 1); // 마지막 랜드마크 유지
-        }
-        // 만약 아직 하나도 못 깼다면?
+        // 🚨 수정: 시작점을 '집'이 아니라 DB의 첫 번째 랜드마크 입구로 설정
         if (currentLandmark == null) {
-            // 임시 객체 생성 (시작점)
-            currentLandmark = Landmark.builder().name("집").build();
+            if (!allLandmarks.isEmpty()) {
+                // 예: 해운대 입구
+                Landmark first = allLandmarks.get(0);
+                currentLandmark = Landmark.builder().name(first.getName() + " 입구").build();
+            } else {
+                currentLandmark = Landmark.builder().name("시작점").build();
+            }
         }
-
 
         // 3. 응답 데이터 조립
         HomeResponse response = HomeResponse.builder()
                 .userInfo(HomeResponse.UserInfo.builder()
                         .nickname(user.getNickname())
-                        .totalSteps(user.getTotalSteps())
+                        .totalSteps(currentSteps)
                         .representativeTitle(user.getRepresentativeTitle())
                         .build())
                 .rankingInfo(HomeResponse.RankingInfo.builder()
@@ -89,7 +95,7 @@ public class HomeApiController {
                 .landmarkInfo(HomeResponse.LandmarkInfo.builder()
                         .name(nextLandmark.getName()) // 목표 건물
                         .requiredSteps(nextLandmark.getRequiredSteps())
-                        .currentSteps(user.getTotalSteps())
+                        .currentSteps(currentSteps)
                         .build())
                 .currentLocationName(currentLandmark.getName())
                 .build();

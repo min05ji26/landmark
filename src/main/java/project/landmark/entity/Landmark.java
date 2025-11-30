@@ -15,6 +15,7 @@ public class Landmark {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String name;
     private Long requiredSteps;
     private String description;
