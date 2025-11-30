@@ -14,17 +14,18 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
+                        // 🚨 [수정] allowedOrigins 대신 allowedOriginPatterns 사용
+                        // 이렇게 하면 allowCredentials(true)와 함께 와일드카드(*) 패턴 사용 가능
+                        .allowedOriginPatterns(
                                 "http://localhost:3000",
                                 "http://localhost:5173",
                                 "http://localhost:8081",
-                                // 👇 [추가] 내 컴퓨터의 현재 IP 주소 추가
-                                "http://192.168.219.140:8081",
-                                "http://192.168.219.140:3000"
+                                "http://localhost:8080",
+                                "http://192.168.219.140:*" // 👈 IP 대역 허용 (유동적일 때 유용)
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(true); // 인증 정보(토큰 등) 허용
             }
         };
     }

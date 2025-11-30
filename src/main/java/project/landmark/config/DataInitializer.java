@@ -1,3 +1,4 @@
+/*
 package project.landmark.config;
 
 import jakarta.annotation.PostConstruct;
@@ -114,4 +115,4 @@ public class DataInitializer {
             stepRecordRepository.save(record);
         }
     }
-}
+}*/

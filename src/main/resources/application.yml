@@ -6,35 +6,33 @@ server:
       force: true
 
 spring:
-  aplication:
+  application:          # [수정] aplication -> application (오타 수정)
     name: landmark
 
   devtools:
     livereload:
-      endabled: true
+      enabled: true     # [수정] endabled -> enabled (오타 수정)
     restart:
-      endabled: true
+      enabled: true     # [수정] endabled -> enabled (오타 수정)
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/landmark?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: "1234"
-    #노트북은 비번 다름
-    #노트북은 1234
 
+  sql:
+    init:
+      mode: always      # [추가] data.sql 파일을 항상 실행하겠다는 설정
 
-
-  ####################################
-  # JPA ??
-  ####################################
   jpa:
-    open-in-view: true      #
+    open-in-view: true
+    defer-datasource-initialization: true # [핵심] 테이블(DDL)을 먼저 만들고 나서 data.sql을 실행하라는 설정
     hibernate:
-      ddl-auto: update      # create, update, ...
+      ddl-auto: update
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy # ?????? ?????? ??
-    show-sql: true          # SQL ?? ??  myName <--> my_name(?????? ??????)
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true    # SQL ??? ??
+        format_sql: true
