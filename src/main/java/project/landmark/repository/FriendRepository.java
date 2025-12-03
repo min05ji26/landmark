@@ -2,21 +2,29 @@ package project.landmark.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import project.landmark.entity.Friend;
 import project.landmark.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
-    // 🔹 kj 기능: User 엔티티로 친구 가져오기
+    // ✅ [복구] RankingService에서 사용하는 메서드 (User 리스트 반환)
     @Query("SELECT f.friend FROM Friend f WHERE f.user = :user")
-    List<User> findFriendsByUser(User user);
+    List<User> findFriendsByUser(@Param("user") User user);
 
-    // 🔹 mj 기능: Friend 엔티티 기반 친구 관계 조회
+    // ---------------------------------------------------------
+
+    // 내 친구 목록 조회 (Friend 엔티티 반환)
     List<Friend> findByUser(User user);
 
-    List<Friend> findByFriend(User friend);
+    // 이미 친구인지 확인 (중복 추가 방지)
+    boolean existsByUserAndFriend(User user, User friend);
+
+    // 친구 관계 찾기 (삭제용)
+    Optional<Friend> findByUserAndFriend(User user, User friend);
 }

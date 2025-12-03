@@ -39,6 +39,7 @@ public class SecurityConfig {
                                 "/api/auth/**", "/api/ranking/**", "/api/achievements/**",
                                 "/api/landmarks", "/api/user/**", "/api/steps/**"
                         ).permitAll()
+                        .requestMatchers( "/api/email-auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -18,7 +18,11 @@ public class UserResponse {
     private String representativeTitle;
     private int level;
     private String profileImageUrl;
-    private String statusMessage; // 🚨 [추가]
+    private String statusMessage;
+
+    // 🚨 [추가] 현재 위치한 랜드마크 이름
+    private String currentLandmark;
+
     private LocalDateTime createdAt;
 
     public static UserResponse from(User user) {
@@ -31,8 +35,9 @@ public class UserResponse {
                 .representativeTitle(user.getRepresentativeTitle())
                 .level(user.getLevel())
                 .profileImageUrl(user.getProfileImageUrl())
-                .statusMessage(user.getStatusMessage()) // 🚨 [추가]
+                .statusMessage(user.getStatusMessage())
                 .createdAt(user.getCreatedAt())
+                // currentLandmark는 Service/Controller에서 계산해서 넣어야 하므로 여기선 null 또는 따로 처리
                 .build();
     }
 }

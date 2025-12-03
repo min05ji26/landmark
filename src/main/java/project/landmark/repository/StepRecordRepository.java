@@ -13,10 +13,14 @@ import java.util.Optional;
 @Repository
 public interface StepRecordRepository extends JpaRepository<StepRecord, Long> {
 
-    // ✅ 추가: 유저와 날짜로 기록 찾기 (오늘 기록이 있는지 확인용)
     Optional<StepRecord> findByUserAndDate(User user, LocalDate date);
 
-    // ✅ 전체 유저 걸음 수 합계 (기존 유지)
+    // ✅ [추가] 유저의 모든 걸음 기록을 날짜순으로 조회 (연속 달성 체크용)
+    List<StepRecord> findAllByUserOrderByDateAsc(User user);
+
+    // ✅ [추가] 유저의 모든 걸음 기록 조회 (하루 N보 달성 체크용)
+    List<StepRecord> findAllByUser(User user);
+
     @Query("SELECT sr.user, SUM(sr.steps) " +
             "FROM StepRecord sr " +
             "WHERE sr.date BETWEEN :start AND :end " +
@@ -24,7 +28,6 @@ public interface StepRecordRepository extends JpaRepository<StepRecord, Long> {
             "ORDER BY SUM(sr.steps) DESC")
     List<Object[]> sumStepsByUserBetweenDates(LocalDate start, LocalDate end);
 
-    // ✅ 특정 구(district) 기준 유저 걸음 수 합계 (기존 유지)
     @Query("SELECT sr.user, SUM(sr.steps) " +
             "FROM StepRecord sr " +
             "WHERE sr.date BETWEEN :start AND :end " +
